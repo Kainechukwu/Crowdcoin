@@ -1,10 +1,30 @@
 import React, { Component } from "react";
 import { MenuMenu, MenuItem, Menu } from "semantic-ui-react";
+import { withRouter } from "next/router";
 
-export default class MenuExampleMenus extends Component {
-  state = {};
+class MenuExampleMenus extends Component {
+  state = {
+    activeItem: "crowdcoin",
+  };
 
-  handleItemClick = (e, { name }) => this.setState({ activeItem: name });
+  componentDidMount() {
+    // Set active item based on the current route
+    const { pathname } = this.props.router;
+    this.setState({ activeItem: pathname });
+  }
+
+  links = [
+    { route: "/", title: "Campaigns", label: "Campaigns" },
+    { route: "/campaigns/new", title: "Create Campaign", label: "+" },
+  ];
+
+  handleItemClick = (e, { name, route }) => {
+    const { router } = this.props;
+
+    // Update active item and navigate to the route
+    this.setState({ activeItem: name });
+    router.push(route);
+  };
 
   render() {
     const { activeItem } = this.state;
@@ -12,31 +32,30 @@ export default class MenuExampleMenus extends Component {
     return (
       <Menu>
         <MenuItem
-          name="browse"
-          active={activeItem === "browse"}
+          name="crowdcoin"
+          route='/'
+          active={activeItem === "crowdcoin"}
           onClick={this.handleItemClick}
         >
           CrowdCoin
         </MenuItem>
 
         <MenuMenu position="right">
-          <MenuItem
-            name="signup"
-            active={activeItem === "signup"}
-            onClick={this.handleItemClick}
-          >
-           Campaigns
-          </MenuItem>
-
-          <MenuItem
-            name="help"
-            active={activeItem === "help"}
-            onClick={this.handleItemClick}
-          >
-            +
-          </MenuItem>
+          {this.links.map(({ route, title, label }) => (
+            <MenuItem
+              key={route}
+              route={route}
+              name={title}
+              active={activeItem === route}
+              onClick={this.handleItemClick}
+            >
+              {label}
+            </MenuItem>
+          ))}
         </MenuMenu>
+        
       </Menu>
     );
   }
 }
+export default withRouter(MenuExampleMenus);

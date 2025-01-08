@@ -2,8 +2,8 @@ import React, { Component } from "react";
 import Layout from "../../components/Layout";
 import factory from "../../ethereum/factory";
 import { Signer } from "../../ethereum/ethers";
-
 import CreateCampaignForm from "../../components/forms/CreateCampaignForm";
+import ErrorBoundary from "../../components/ErrorBoundary";
 
 class CampaignNew extends Component {
   state = {
@@ -14,6 +14,7 @@ class CampaignNew extends Component {
 
   handleChange = (event) => {
     this.setState({ minimumContribution: event.target.value });
+    this.setState({ errorMessage: "" })
   };
 
   onSubmit = async (event) => {
@@ -21,11 +22,17 @@ class CampaignNew extends Component {
     this.setState({ loading: true, errorMessage: "" });
 
     try {
-     
-
       if (!Signer) {
         throw new Error("No signer available. Please connect your wallet.");
       }
+      if (isNaN(this.state.minimumContribution) || this.state.minimumContribution.trim() === "") {
+        this.setState({
+          loading: false, // Reset loading since we're exiting early
+          errorMessage: "Input must be a valid number",
+        });
+        return;
+      }
+  
 
       // Connect factory contract to signer
       const factoryWithSigner = factory.connect(Signer);
@@ -64,4 +71,11 @@ class CampaignNew extends Component {
     );
   }
 }
-export default CampaignNew;
+
+const CampaignNewWithErrorBoundary = () => (
+  <ErrorBoundary>
+    <CampaignNew />
+  </ErrorBoundary>
+);
+
+export default CampaignNewWithErrorBoundary;

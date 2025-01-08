@@ -1,5 +1,5 @@
 import React from "react";
-import { FormField, Form, Input } from "semantic-ui-react";
+import { FormField, Form, Input, Message } from "semantic-ui-react";
 import Button from "../../components/Button";
 
 const CreateCampaignForm = ({
@@ -9,7 +9,7 @@ const CreateCampaignForm = ({
   loading,
   errorMessage,
 }) => (
-  <Form onSubmit={onSubmit}>
+  <Form onSubmit={onSubmit} error>
     <FormField>
       <label>Minimum contribution</label>
       <Input
@@ -20,8 +20,17 @@ const CreateCampaignForm = ({
       />
     </FormField>
 
-    {errorMessage && <p>{errorMessage}</p>}
-    <Button type="submit" label="Create!" position='right' labeled={loading ? true : false} icon={loading ?<i aria-hidden="true" className="add circle icon"></i> : null} loading={loading}/>
+    {errorMessage && <Message error header="Oops" content={errorMessage} />}
+    <Button
+      type="submit"
+      label="Create!"
+      position="right"
+      labeled={loading ? true : false}
+      icon={
+        loading ? <i aria-hidden="true" className="add circle icon"></i> : null
+      }
+      loading={loading}
+    />
   </Form>
 );
 
