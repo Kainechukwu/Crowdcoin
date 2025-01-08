@@ -3,13 +3,13 @@ import { Provider } from "./ethers";
 import CampaignFactory from "./build/CampaignFactory.json";
 
 // Contract details
-const CONTRACT_ADDRESS = "0xCB6053EedfbDC5a1dc41dFCB21aEb688BE311601";
+const CONTRACT_ADDRESS = "0x6193d7869AF582D235b3f0037D577a2BD953772f";
 const parsedCampaignFactory =
   typeof CampaignFactory === "string"
     ? JSON.parse(CampaignFactory)
     : CampaignFactory;
 
-const CONTRACT_ABI = parsedCampaignFactory.interface;
+const CONTRACT_ABI = parsedCampaignFactory.abi;
 
 // Function to get the factory contract instance
 const getFactoryInstance = () => {

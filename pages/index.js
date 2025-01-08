@@ -4,6 +4,7 @@ import factory from "../ethereum/factory";
 import MetaMask from "../components/MetaMask";
 import Layout from "../components/Layout";
 import Button from "../components/Button";
+import EmptyCampaignsList from "../components/empty-states/EmptyCampaignsList";
 import Link from "next/link";
 
 class CampaignIndex extends Component {
@@ -22,7 +23,15 @@ class CampaignIndex extends Component {
       };
     });
 
-    return <Card.Group items={items} />;
+    return (
+      <>
+        {items.length > 0 ? (
+          <Card.Group items={items} />
+        ) : (
+          <EmptyCampaignsList />
+        )}
+      </>
+    );
   }
 
   render() {

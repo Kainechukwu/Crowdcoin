@@ -8,6 +8,7 @@ const CreateCampaignForm = ({
   value,
   loading,
   errorMessage,
+  successMessage
 }) => (
   <Form onSubmit={onSubmit} error>
     <FormField>
@@ -21,6 +22,7 @@ const CreateCampaignForm = ({
     </FormField>
 
     {errorMessage && <Message error header="Oops" content={errorMessage} />}
+    {successMessage && <Message  header="Success" content={successMessage} />}
     <Button
       type="submit"
       label="Create!"

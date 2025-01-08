@@ -10,11 +10,19 @@ class CampaignNew extends Component {
     minimumContribution: "",
     loading: false,
     errorMessage: "",
+    successMessage: "",
   };
 
   handleChange = (event) => {
     this.setState({ minimumContribution: event.target.value });
-    this.setState({ errorMessage: "" })
+    if (this.state.errorMessage) {
+      console.log("clearing err");
+      this.setState({ errorMessage: "" });
+    }
+    if (this.state.successMessage) {
+      console.log("clearing succ");
+      this.setState({ successMessage: "" });
+    }
   };
 
   onSubmit = async (event) => {
@@ -25,14 +33,16 @@ class CampaignNew extends Component {
       if (!Signer) {
         throw new Error("No signer available. Please connect your wallet.");
       }
-      if (isNaN(this.state.minimumContribution) || this.state.minimumContribution.trim() === "") {
+      if (
+        isNaN(this.state.minimumContribution) ||
+        this.state.minimumContribution.trim() === ""
+      ) {
         this.setState({
           loading: false, // Reset loading since we're exiting early
           errorMessage: "Input must be a valid number",
         });
         return;
       }
-  
 
       // Connect factory contract to signer
       const factoryWithSigner = factory.connect(Signer);
@@ -47,12 +57,16 @@ class CampaignNew extends Component {
       const receipt = await tx.wait();
       console.log("Transaction confirmed:", receipt);
 
+      this.setState({
+        successMessage: "Campaign created successfully!",
+      });
+
       // Optionally redirect or notify the user after success
     } catch (error) {
       console.error("Error creating campaign:", error);
       this.setState({ errorMessage: error.message });
     } finally {
-      this.setState({ loading: false });
+      this.setState({ loading: false, minimumContribution: "" });
     }
   };
 
@@ -66,6 +80,7 @@ class CampaignNew extends Component {
           onChange={this.handleChange}
           loading={this.state.loading}
           errorMessage={this.state.errorMessage}
+          successMessage={this.state.successMessage}
         />
       </Layout>
     );
