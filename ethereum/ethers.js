@@ -1,19 +1,28 @@
 import { ethers } from "ethers";
 import { infuraLink } from "./utils/constants";
 
-let provider;
+let provider, signer;
 
 if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
-  console.log("Metamask detacted");
-  // We are in the browser and MetaMask is running
-  // Request user to connect their wallet
+  console.log("MetaMask detected");
+
+  // Request account access
   await window.ethereum.request({ method: "eth_requestAccounts" });
 
-  // Use the injected provider from MetaMask
+  // Use the injected MetaMask provider
   provider = new ethers.BrowserProvider(window.ethereum);
+
+  // Get the signer from the provider
+  signer = await provider.getSigner();
 } else {
-  console.log("No Metamask detacted");
+  console.log("No MetaMask detected, using Infura provider");
+
+  // Fallback to Infura provider
   provider = new ethers.JsonRpcProvider(infuraLink);
+
+  // No signer available in fallback mode
+  signer = null;
 }
 
-export default provider;
+// Export both provider and signer as named exports
+export { provider as Provider, signer as Signer };

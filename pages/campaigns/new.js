@@ -1,11 +1,15 @@
 import React, { Component } from "react";
 import Layout from "../../components/Layout";
 import factory from "../../ethereum/factory";
+import { Signer } from "../../ethereum/ethers";
+
 import CreateCampaignForm from "../../components/forms/CreateCampaignForm";
 
 class CampaignNew extends Component {
   state = {
     minimumContribution: "",
+    loading: false,
+    errorMessage: "",
   };
 
   handleChange = (event) => {
@@ -14,19 +18,35 @@ class CampaignNew extends Component {
 
   onSubmit = async (event) => {
     event.preventDefault();
-    console.log(this.state.minimumContribution);
+    this.setState({ loading: true, errorMessage: "" });
 
-    // const accounts = await web3.eth.getAccounts();
+    try {
+     
 
-    // try {
-    //   await factory.methods
-    //     .createCampaign(this.state.minimumContribution)
-    //     .send({
-    //       from: accounts[0],
-    //     });
-    // } catch (error) {
-    //   console.log(error);
-    // }
+      if (!Signer) {
+        throw new Error("No signer available. Please connect your wallet.");
+      }
+
+      // Connect factory contract to signer
+      const factoryWithSigner = factory.connect(Signer);
+
+      // Send the transaction
+      const tx = await factoryWithSigner.createCampaign(
+        this.state.minimumContribution
+      );
+      console.log("Transaction hash:", tx.hash);
+
+      // Wait for confirmation
+      const receipt = await tx.wait();
+      console.log("Transaction confirmed:", receipt);
+
+      // Optionally redirect or notify the user after success
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      this.setState({ errorMessage: error.message });
+    } finally {
+      this.setState({ loading: false });
+    }
   };
 
   render() {
@@ -37,6 +57,8 @@ class CampaignNew extends Component {
           value={this.state.minimumContribution}
           onSubmit={this.onSubmit}
           onChange={this.handleChange}
+          loading={this.state.loading}
+          errorMessage={this.state.errorMessage}
         />
       </Layout>
     );
