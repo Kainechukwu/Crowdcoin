@@ -14,6 +14,7 @@ if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
 
   // Get the signer from the provider
   signer = await provider.getSigner();
+  console.log('signer: ', JSON.stringify(signer))
 } else {
   console.log("No MetaMask detected, using Infura provider");
 
@@ -26,3 +27,5 @@ if (typeof window !== "undefined" && typeof window.ethereum !== "undefined") {
 
 // Export both provider and signer as named exports
 export { provider as Provider, signer as Signer };
+export const getProvider = () => provider;
+export const getSigner = () => signer;

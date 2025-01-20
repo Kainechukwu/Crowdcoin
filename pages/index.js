@@ -1,10 +1,10 @@
 import React, { Component } from "react";
 import { Card } from "semantic-ui-react";
-import factory from "../ethereum/factory";
-import MetaMask from "../components/MetaMask";
-import Layout from "../components/Layout";
-import Button from "../components/Button";
-import EmptyCampaignsList from "../components/empty-states/EmptyCampaignsList";
+import factory from "@/ethereum/factory";
+import MetaMask from "@/components/MetaMask";
+import Layout from "@/components/Layout";
+import Button from "@/components/Button";
+import EmptyCampaignsList from "@/components/empty-states/EmptyCampaignsList";
 import Link from "next/link";
 
 class CampaignIndex extends Component {
@@ -42,7 +42,6 @@ class CampaignIndex extends Component {
           <h3>Open Campaigns</h3>
           <Link href="/campaigns/new">
             <Button
-              onClick={() => console.log("clicked Create Campaign")}
               label="Create Campaign"
               labeled
               floated

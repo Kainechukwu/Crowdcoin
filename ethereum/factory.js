@@ -13,12 +13,12 @@ const CONTRACT_ABI = parsedCampaignFactory.abi;
 
 // Function to get the factory contract instance
 const getFactoryInstance = () => {
-  console.log("CONTRACT_ABI: ", CONTRACT_ABI);
+  // console.log("CONTRACT_ABI: ", CONTRACT_ABI);
   return new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, Provider);
 };
 
 // Export the contract instance for use
 const factoryInstance = getFactoryInstance();
-console.log("factoryInstance: ", factoryInstance);
+// console.log("factoryInstance: ", factoryInstance);
 
 export default factoryInstance;

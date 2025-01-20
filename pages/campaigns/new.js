@@ -1,9 +1,10 @@
 import React, { Component } from "react";
-import Layout from "../../components/Layout";
-import factory from "../../ethereum/factory";
-import { Signer } from "../../ethereum/ethers";
-import CreateCampaignForm from "../../components/forms/CreateCampaignForm";
-import ErrorBoundary from "../../components/ErrorBoundary";
+import Layout from "@/components/Layout";
+import factory from "@/ethereum/factory";
+import { Signer } from "@/ethereum/ethers";
+import CreateCampaignForm from "@/components/forms/CreateCampaignForm";
+import ErrorBoundary from "@/components/ErrorBoundary";
+// import { ethers } from "ethers";
 
 class CampaignNew extends Component {
   state = {
@@ -46,6 +47,9 @@ class CampaignNew extends Component {
 
       // Connect factory contract to signer
       const factoryWithSigner = factory.connect(Signer);
+      // const minimumContributionInWei = ethers.parseEther(
+      //   this.state.minimumContribution.toString()
+      // );
 
       // Send the transaction
       const tx = await factoryWithSigner.createCampaign(

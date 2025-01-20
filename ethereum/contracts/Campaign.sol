@@ -1,144 +1,4 @@
 // // SPDX-License-Identifier: MIT
-// pragma solidity 0.8.28;
-
-// contract CampaignFactory {
-//     address[] public deployedCampaigns;
-
-//     function createCampaign(uint minimum) public {
-//         address newCampaign = new Campaign(minimum, msg.sender);
-//         deployedCampaigns.push(newCampaign);
-//     }
-
-//     function getDeployedCampaigns() public view returns (address[] memory){
-//         return deployedCampaigns;
-//     }
-// }
-
-// contract Campaign {
-// //struct
-//     struct Request {
-//         string description;
-//         uint value;
-//         address recepient;
-//         bool complete;
-//         mapping(address => bool) approvals;
-//         uint approvalCount;
-//     }
-//     struct RequestView {
-//         string description;
-//         uint value;
-//         address recepient;
-//         bool complete;
-//         uint approvalCount;
-//     }
-
-  
-// //modifiers
-//     modifier restricted() {
-//         require(msg.sender == manager);
-//         _;
-
-//     }
-//     modifier isApprover() {
-//         require(approvers[msg.sender]);
-//         _;
-//     }
-
-// //properties
-//     address public manager;
-//     uint public minimumContribution;
-//     mapping(address => bool) public approvers;
-//     uint approversCount;
-//     Request[] public requests;
-          
-
-// //methods
-//     constructor(uint minimum, address creator) public {
-//     manager = creator;
-//     minimumContribution = minimum;
-//    }
-
-//    function contribute() public payable {
-//     require(msg.value >= minimumContribution);
-
-//     approvers[msg.sender] = true;
-//     approversCount++;
-
-//    }
-
-
-//    function createRequest( string memory description, uint value, address recepient )  public restricted  {
-//         Request memory newRequest = Request({
-//             description: description,
-//             value: value, 
-//             recepient: recepient, 
-//             complete: false, 
-//             approvalCount: 0
-
-//         });
-//         requests.push(newRequest);
-
-
-//     }
-
-//     function approveRequest(uint index) public {
-//         require(approvers[msg.sender]);
-//         Request storage selectedRequest = requests[index];
-//         require(!selectedRequest.approvals[msg.sender]);
-//         selectedRequest.approvals[msg.sender] = true;
-//         selectedRequest.approvalCount = selectedRequest.approvalCount + 1;
-        
-//     }
-
-//     function getRequest(uint index) public view returns (RequestView memory) {
-//         Request storage selectedRequest = requests[index];
-
-//         return RequestView({
-//             description: selectedRequest.description,
-//             value: selectedRequest.value, 
-//             recepient: selectedRequest.recepient, 
-//             complete: selectedRequest.complete, 
-//             approvalCount: selectedRequest.approvalCount
-
-//         });
-//     }
-
-
-//     function finalizeRequest(uint index) public restricted {
-//         Request storage selectedRequest = requests[index];
-//         require(!selectedRequest.complete);
-//         bool approvalThreshold = selectedRequest.approvalCount > approversCount / 2; //greater than half of total approvers
-//         require(approvalThreshold);
-//         selectedRequest.recepient.transfer(selectedRequest.value);
-//         selectedRequest.complete = true;
-
-//     }
-
-//     function getSummary() public view returns (
-//         uint ,
-//         uint,
-//         uint ,
-//         uint ,
-//         address 
-//     ) {
-//         return (
-//             address(this).balance,
-//             minimumContribution,
-//             requests.length,
-//             approversCount,
-//             manager
-//         );
-//     }
-
-//     function getRequestsCount() public view returns (uint) {       
-//         return requests.length;
-
-//     }   
-
-   
-
-// }
-
 pragma solidity 0.8.28;
 
 contract CampaignFactory {
@@ -252,4 +112,23 @@ contract Campaign {
     function getRequestsCount() public view returns (uint) {
         return requests.length;
     }
+
+    function getRequest(uint index) public view returns (
+    string memory description,
+    uint value,
+    address recipient,
+    bool complete,
+    uint approvalCount
+) {
+    Request storage request = requests[index];
+    return (
+        request.description,
+        request.value,
+        request.recipient,
+        request.complete,
+        request.approvalCount
+    );
+}
+
+  
 }
