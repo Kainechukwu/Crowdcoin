@@ -1,32 +1,77 @@
 import React, { Component } from "react";
-import Layout from "../../components/Layout";
-import factory from "../../ethereum/factory";
-import CreateCampaignForm from "../../components/forms/CreateCampaignForm";
+import Layout from "@/components/Layout";
+import factory from "@/ethereum/factory";
+import { Signer } from "@/ethereum/ethers";
+import CreateCampaignForm from "@/components/forms/CreateCampaignForm";
+import ErrorBoundary from "@/components/ErrorBoundary";
+// import { ethers } from "ethers";
 
 class CampaignNew extends Component {
   state = {
     minimumContribution: "",
+    loading: false,
+    errorMessage: "",
+    successMessage: "",
   };
 
   handleChange = (event) => {
     this.setState({ minimumContribution: event.target.value });
+    if (this.state.errorMessage) {
+      console.log("clearing err");
+      this.setState({ errorMessage: "" });
+    }
+    if (this.state.successMessage) {
+      console.log("clearing succ");
+      this.setState({ successMessage: "" });
+    }
   };
 
   onSubmit = async (event) => {
     event.preventDefault();
-    console.log(this.state.minimumContribution);
+    this.setState({ loading: true, errorMessage: "" });
 
-    // const accounts = await web3.eth.getAccounts();
+    try {
+      if (!Signer) {
+        throw new Error("No signer available. Please connect your wallet.");
+      }
+      if (
+        isNaN(this.state.minimumContribution) ||
+        this.state.minimumContribution.trim() === ""
+      ) {
+        this.setState({
+          loading: false, // Reset loading since we're exiting early
+          errorMessage: "Input must be a valid number",
+        });
+        return;
+      }
 
-    // try {
-    //   await factory.methods
-    //     .createCampaign(this.state.minimumContribution)
-    //     .send({
-    //       from: accounts[0],
-    //     });
-    // } catch (error) {
-    //   console.log(error);
-    // }
+      // Connect factory contract to signer
+      const factoryWithSigner = factory.connect(Signer);
+      // const minimumContributionInWei = ethers.parseEther(
+      //   this.state.minimumContribution.toString()
+      // );
+
+      // Send the transaction
+      const tx = await factoryWithSigner.createCampaign(
+        this.state.minimumContribution
+      );
+      console.log("Transaction hash:", tx.hash);
+
+      // Wait for confirmation
+      const receipt = await tx.wait();
+      console.log("Transaction confirmed:", receipt);
+
+      this.setState({
+        successMessage: "Campaign created successfully!",
+      });
+
+      // Optionally redirect or notify the user after success
+    } catch (error) {
+      console.error("Error creating campaign:", error);
+      this.setState({ errorMessage: error.message });
+    } finally {
+      this.setState({ loading: false, minimumContribution: "" });
+    }
   };
 
   render() {
@@ -37,9 +82,19 @@ class CampaignNew extends Component {
           value={this.state.minimumContribution}
           onSubmit={this.onSubmit}
           onChange={this.handleChange}
+          loading={this.state.loading}
+          errorMessage={this.state.errorMessage}
+          successMessage={this.state.successMessage}
         />
       </Layout>
     );
   }
 }
-export default CampaignNew;
+
+const CampaignNewWithErrorBoundary = () => (
+  <ErrorBoundary>
+    <CampaignNew />
+  </ErrorBoundary>
+);
+
+export default CampaignNewWithErrorBoundary;

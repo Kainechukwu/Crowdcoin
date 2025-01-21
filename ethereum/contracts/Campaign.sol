@@ -1,119 +1,134 @@
-pragma solidity ^0.4.17;
+// // SPDX-License-Identifier: MIT
+pragma solidity 0.8.28;
 
 contract CampaignFactory {
     address[] public deployedCampaigns;
 
     function createCampaign(uint minimum) public {
-        address newCampaign = new Campaign(minimum, msg.sender);
+        address newCampaign = address(new Campaign(minimum, msg.sender));
         deployedCampaigns.push(newCampaign);
     }
 
-    function getDeployedCampaigns() public view returns (address[]){
+    function getDeployedCampaigns() public view returns (address[] memory) {
         return deployedCampaigns;
     }
 }
 
 contract Campaign {
-//struct
     struct Request {
         string description;
         uint value;
-        address recepient;
+        address recipient;
         bool complete;
         mapping(address => bool) approvals;
         uint approvalCount;
     }
-    struct RequestView {
-        string description;
-        uint value;
-        address recepient;
-        bool complete;
-        uint approvalCount;
-    }
 
-//modifiers
-    modifier restricted() {
-        require(msg.sender == manager);
-        _;
-
-    }
-    modifier isApprover() {
-        require(approvers[msg.sender]);
-        _;
-    }
-
-//properties
     address public manager;
     uint public minimumContribution;
     mapping(address => bool) public approvers;
-    uint approversCount;
+    uint public approversCount;
     Request[] public requests;
-          
 
-//methods
-   function Campaign(uint minimum, address creator) public {
-    manager = creator;
-    minimumContribution = minimum;
-   }
+    modifier restricted() {
+        require(msg.sender == manager, "Only the manager can perform this action");
+        _;
+    }
 
-   function contribute() public payable {
-    require(msg.value >= minimumContribution);
+    event ContributionReceived(address indexed contributor, uint amount);
+    event RequestCreated(string description, uint value, address indexed recipient);
+    event RequestFinalized(uint indexed requestId);
 
-    approvers[msg.sender] = true;
-    approversCount++;
+    constructor(uint minimum, address creator) {
+        manager = creator;
+        minimumContribution = minimum;
+    }
 
-   }
+    function contribute() public payable {
+        require(msg.value >= minimumContribution, "Contribution is below the minimum");
 
+        approvers[msg.sender] = true;
+        approversCount++;
 
-   function createRequest( string description, uint value, address recepient )  public restricted  {
-        Request memory newRequest = Request({
-            description: description,
-            value: value, 
-            recepient: recepient, 
-            complete: false, 
-            approvalCount: 0
+        emit ContributionReceived(msg.sender, msg.value);
+    }
 
-        });
-        requests.push(newRequest);
+    function createRequest(
+        string memory description,
+        uint value,
+        address recipient
+    ) public restricted {
+        Request storage newRequest = requests.push();
+        newRequest.description = description;
+        newRequest.value = value;
+        newRequest.recipient = recipient;
+        newRequest.complete = false;
+        newRequest.approvalCount = 0;
 
-
+        emit RequestCreated(description, value, recipient);
     }
 
     function approveRequest(uint index) public {
-        require(approvers[msg.sender]);
-        Request storage selectedRequest = requests[index];
-        require(!selectedRequest.approvals[msg.sender]);
-        selectedRequest.approvals[msg.sender] = true;
-        selectedRequest.approvalCount = selectedRequest.approvalCount + 1;
-        
+        require(approvers[msg.sender], "Only approvers can approve requests");
+        Request storage request = requests[index];
+        require(!request.approvals[msg.sender], "You have already approved this request");
+
+        request.approvals[msg.sender] = true;
+        request.approvalCount++;
     }
-
-    function getRequest(uint index) public view returns (RequestView memory) {
-        Request storage selectedRequest = requests[index];
-
-        return RequestView({
-            description: selectedRequest.description,
-            value: selectedRequest.value, 
-            recepient: selectedRequest.recepient, 
-            complete: selectedRequest.complete, 
-            approvalCount: selectedRequest.approvalCount
-
-        });
-    }
-
 
     function finalizeRequest(uint index) public restricted {
-        Request storage selectedRequest = requests[index];
-        require(!selectedRequest.complete);
-        bool approvalThreshold = selectedRequest.approvalCount > approversCount / 2; //greater than half of total approvers
-        require(approvalThreshold);
-        selectedRequest.recepient.transfer(selectedRequest.value);
-        selectedRequest.complete = true;
+        Request storage request = requests[index];
+        require(!request.complete, "Request is already finalized");
+        require(
+            request.approvalCount > approversCount / 2,
+            "Approval threshold not met"
+        );
 
+        (bool sent, ) = request.recipient.call{value: request.value}("");
+        require(sent, "Transfer failed");
+
+        request.complete = true;
+
+        emit RequestFinalized(index);
     }
 
-   
+    function getSummary() public view returns (
+        uint campaignBalance,
+        uint minimumContributionAmount,
+        uint requestsCount,
+        uint contributorsCount,
+        address managerAddress
+    ) {
+        return (
+            address(this).balance,
+            minimumContribution,
+            requests.length,
+            approversCount,
+            manager
+        );
+    }
 
+    function getRequestsCount() public view returns (uint) {
+        return requests.length;
+    }
+
+    function getRequest(uint index) public view returns (
+    string memory description,
+    uint value,
+    address recipient,
+    bool complete,
+    uint approvalCount
+) {
+    Request storage request = requests[index];
+    return (
+        request.description,
+        request.value,
+        request.recipient,
+        request.complete,
+        request.approvalCount
+    );
 }
 
- 
+  
+}

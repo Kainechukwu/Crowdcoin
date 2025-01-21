@@ -1,1 +1,9 @@
+#dependencies
 node_modules
+
+#IDE - VSCode
+.vscode/*
+.vscode/settings.json
+
+#next.js
+.next

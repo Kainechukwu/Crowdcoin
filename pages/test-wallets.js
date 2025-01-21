@@ -1,5 +1,5 @@
 import React from "react";
-import useWallets from "../src/hooks/useWallets";
+import useWallets from "@/src/hooks/useWallets";
 
 function App() {
   const { wallets, connectWallet, connectedAccount } = useWallets();
